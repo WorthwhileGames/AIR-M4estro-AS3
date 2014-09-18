@@ -28,7 +28,6 @@
 	
 	import com.maestro.music.MusicManager;
 	
-	import com.cloudkid.peep.trashstash.BundledGameContainer;
 	
 
 
@@ -60,7 +59,7 @@
 		public var measureController:MeasureController;
 		
 		
-		private var __app:BundledGameContainer;
+		private var __app:M4estroMain;
 		
 		public function NoteTrisSkin()
 		{
@@ -80,7 +79,7 @@
 			
 		}
 		
-		public function init(app:BundledGameContainer):void
+		public function init(app:M4estroMain):void
 		{
 			__app = app;
 			measureController.init(gameBoard);

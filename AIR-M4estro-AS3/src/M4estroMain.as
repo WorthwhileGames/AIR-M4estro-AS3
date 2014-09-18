@@ -1,4 +1,4 @@
-package com.cloudkid.peep.trashstash
+package 
 {
 	//import com.cloudkid.*;
 	//import com.cloudkid.animation.Animator;
@@ -32,14 +32,13 @@ package com.cloudkid.peep.trashstash
 	
 	import org.wwlib.utils.WwDebug;
 	import org.wwlib.utils.WwDeviceInfo;
-	import org.wwlib.utils.debugPanel;
 	
 	/*****/
 	
-	final public class BundledGameContainer extends Application
+	final public class M4estroMain extends Application
 	{
 		/** This variable should stay null. It ensures that the game class is compiled and put in the finished swf, so that the game can be created when it is needed*/
-		private static const __classExistanceEnforcer:Class = TrashStashGame;
+		//private static const __classExistanceEnforcer:Class = TrashStashGame;
 		
 		// The game container
 		//private var __container:GameContainer;
@@ -51,8 +50,8 @@ package com.cloudkid.peep.trashstash
 		
 		public static const DEBUG_IP:String = GAME::DEBUG_IP;
 		
-		[Embed(source="../../../../../embedded_assets/intro.swf",mimeType="application/octet-stream")]
-		private static var __controlsBytesClass:Class;
+		//[Embed(source="../../../../../embedded_assets/intro.swf",mimeType="application/octet-stream")]
+		//private static var __controlsBytesClass:Class;
 		
 		private var __intro:MovieClip;
 		
@@ -83,7 +82,7 @@ package com.cloudkid.peep.trashstash
 		/**
 		*   The game container
 		*/
-		public function BundledGameContainer()
+		public function M4estroMain()
 		{
 			/*Accelerometer handling code
 				//if accelerometer is available then activate it to control the ball

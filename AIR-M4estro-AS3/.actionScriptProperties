@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<actionScriptProperties analytics="false" mainApplicationPath="com/cloudkid/peep/trashstash/BundledGameContainer.as" projectUUID="d18b689a-782e-49a5-a579-23b927d0f472" version="11">
+<actionScriptProperties analytics="false" mainApplicationPath="M4estroMain.as" projectUUID="d18b689a-782e-49a5-a579-23b927d0f472" version="11">
   <compiler additionalCompilerArguments="-locale en_US&#10;-define+=GAME::DEBUG_IP,&quot;'localhost'&quot;&#10;-define+=SYSTEM::MOBILE,false&#10;-define+=SYSTEM::IOS,false&#10;-define+=SYSTEM::ANDROID,false&#10;-define+=SYSTEM::FLASH,true&#10;-define+=CONFIG::DEBUG,false" advancedTelemetry="false" autoRSLOrdering="true" copyDependentFiles="true" fteInMXComponents="false" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="false" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderPath="bin-debug" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="true" useDebugRSLSwfs="true" useFlashSDK="true" verifyDigests="true" warn="true">
     <compilerSourcePath/>
     <libraryPath defaultLinkType="0">
@@ -39,7 +39,7 @@
     <sourceAttachmentPath/>
   </compiler>
   <applications>
-    <application path="com/cloudkid/peep/trashstash/BundledGameContainer.as">
+    <application path="M4estroMain.as">
       <airExcludes/>
     </application>
   </applications>
