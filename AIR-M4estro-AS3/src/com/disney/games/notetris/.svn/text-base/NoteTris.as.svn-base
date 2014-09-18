@@ -1,0 +1,308 @@
+package com.disney.games.notetris
+{
+    import com.disney.*;
+    import com.disney.base.BaseMovieClip;
+    import com.disney.games.BaseGameController;
+    import com.disney.games.GameContainer;
+	import com.disney.util.Debug;
+    import com.disney.input.*;
+    import com.disney.loaders.*;
+    import com.disney.trumpet3d.objects.WorldObject;
+    import com.disney.trumpet3d.objects.skeletal.SkeletalAnimationData;
+    import com.disney.trumpet3d.objects.skeletal.SkeletalAnimationFactory;
+    import com.disney.trumpet3d.objects.skeletal.SkeletalModel;
+    import com.disney.trumpet3d.objects.skeletal.SkeletalModelFactory;
+    import com.disney.ui.buttons.PushButton;
+    import com.disney.ui.buttons.PushButtonEvent;
+	
+	import com.maestro.controller.AudioInstrumentController;
+	
+	import com.disney.games.notetris.world.BeatBar;
+    import com.disney.games.notetris.ui.WorldDisplay;
+	import com.disney.games.notetris.managers.InputManager;
+	import com.disney.games.notetris.world.GameBoard;
+	
+    import flash.display.*;
+    import flash.events.*;
+    import flash.system.*;
+    import flash.text.TextField;
+	import flash.utils.getDefinitionByName;
+	import flash.media.Sound;
+	import flash.net.URLRequest;
+	
+	import com.maestro.music.MusicManager;
+
+    /**
+     * Base controller of the game.
+     */
+    public class NoteTris extends BaseGameController
+    {
+        // Config for the game
+        private var __config:XML;
+		private var __instrumentConfigURL:String;
+		private var __soundtrackConfigURL:String;
+
+        // Game's content swf, including images, sounds, and animations
+        private var __content:*;
+		
+		private var noteTrisSkin:NoteTrisSkin;
+		private var gameBoard:GameBoard;
+		private var scoreColumn:MovieClip;
+		private var notationView:MovieClip;
+		//private var beatBar:BeatBar;
+		
+		private var pianoController:AudioInstrumentController;
+		private var blocksController:AudioInstrumentController;
+		private var funkController:AudioInstrumentController;
+		
+
+        /**
+         * Init method.
+         */
+        public function NoteTris()
+        {
+            super();
+		
+            log("constructor", "NoteTris");
+
+            OS.instance.debug = true;
+            OS.instance.framerate.visible = true;
+            OS.instance.framerate.y = OS.instance.stage.stageHeight - OS.instance.framerate.height;
+        }
+
+        /**
+         * Initialize the minigame
+         * @param	mgc Minigame controller
+         * @return A reference to the minigame
+         */
+        public override function init(container:GameContainer):void
+        {
+            super.init(container);
+
+            var configURL:String = assetPath + "game_config.xml";
+
+            log("init: configURL: " + configURL, "NoteTris");
+
+            XMLLoader.instance.load(configURL, onConfigLoaded);
+			
+            log("init: assetPath: " + assetPath, "NoteTris");
+
+            customMetagameEvent(1, 100, "CUSTOM_METAGAME_EVENT");
+			
+			InputManager.init(OS.instance.stage);
+			MusicManager.instance.init(assetPath);
+			
+			MusicManager.instance.addEventListener(MusicManager.INSTRUMENT_CONFIG_LOADED, onInstrumentConfigLoaded);
+			MusicManager.instance.addEventListener(MusicManager.SONG_LOADED, onSongLoaded);
+        }
+
+
+        /**
+         * Start a game level.
+         * @param level Game level.
+         * @param score Current game score.
+         */
+        override public function startLevel(level:Number = 0, score:Number = 0):void
+        {
+            this.level = level;
+            this.score = score;
+            super.startLevel(level, score);
+        }
+
+        /**
+         * End current game level.
+         * @param level Game level.
+         * @param score Current game score.
+         */
+        override public function endLevel(level:Number = 0, score:Number = 0):void
+        {
+            this.level = level;
+            this.score = score;
+            super.endLevel(level, score);
+        }
+
+
+        /**
+         * Callback when the game's config xml has loaded
+         * @param	xml Config's xml
+         */
+        private function onConfigLoaded(xml:XML):void
+        {
+            // Store our game config
+            __config = xml;
+
+            log("onConfigLoaded: Loading Content SWF: " + __config.content.@swf, "NoteTris");
+            MediaLoader.instance.load(assetPath + __config.content.@swf, onContentLoaded);
+			
+			__instrumentConfigURL = __config.instrument.@config;
+			__soundtrackConfigURL = __config.soundtrack.@config;
+			log("onConfigLoaded: Instrument Config URL: " + __config.instrument.@config, "NoteTris");
+			log("onConfigLoaded: Soundtrack Config URL: " + __config.soundtrack.@config, "NoteTris");
+        }
+
+        /**
+         * Callback for game's content swf loaded
+         * @param	result Media loader
+         */
+        private function onContentLoaded(result:MediaLoaderResult):void
+        {
+			log("onContentLoaded: result: " + result, "NoteTris");
+            // Store our content and add it to the stage
+            __content = result.content;
+
+			noteTrisSkin = (__content as NoteTrisSkin);
+			noteTrisSkin.init(this);
+			
+			gameBoard = noteTrisSkin.gameBoard;
+			scoreColumn = noteTrisSkin.scoreColumn;
+			notationView = noteTrisSkin.notationView;
+			//beatBar = noteTrisSkin.beatBar;
+			
+			pianoController = noteTrisSkin.pianoController;
+			blocksController = noteTrisSkin.blocksController;
+			funkController = noteTrisSkin.funkController;
+		
+			log("onContentLoaded: noteTrisSkin: " + noteTrisSkin, "NoteTris");
+			log("onContentLoaded: gameBoard: " + gameBoard, "NoteTris");
+			log("onContentLoaded: scoreColumn: " + scoreColumn, "NoteTris");
+			log("onContentLoaded: notationView: " + notationView, "NoteTris");
+			//log("onContentLoaded: beatBar: " + beatBar, "NoteTris");
+			
+			MusicManager.instance.loadInstruments(__instrumentConfigURL);
+			
+			gameBoard.init(this);
+			
+            addChild(__content);			
+        }
+		
+		public function onInstrumentConfigLoaded(event:Event):void
+		{
+			MusicManager.instance.initializeInstrumentController(pianoController, "piano");
+			MusicManager.instance.initializeInstrumentController(blocksController, "lead3");
+			MusicManager.instance.initializeInstrumentController(funkController, "bassline");
+			
+			//MusicManager.instance.loadSong(__soundtrackConfigURL);
+		}
+		
+		public function onSongLoaded(event:Event):void
+		{
+
+		}
+		
+        /**
+         * Start the game.
+         */
+        override public function startGame(level:Number = NaN, score:Number = NaN):void
+        {
+			super.startGame(level, score);
+        }
+
+        /**
+         * Show Game over.
+         */
+        private function showGameOver():void
+        {
+
+        }
+
+        /**
+         * Exit the game - Calls the MGC to exit
+         * @param event param
+         */
+        public function exit(event:PushButtonEvent = null):void
+        {
+            log("exit: ", "NoteTris");
+            destroy();
+        }
+
+
+        /**
+         * Handle the keydown event
+         * @param	event Key event
+         */
+        private function onKeyDown(event:KeyboardEvent):void
+        {
+            log("onKeyDown: " + event.keyCode, "NoteTris");
+
+            // Exit the game on ESCAPE
+            if (event.keyCode == Keys.ESCAPE)
+            {
+                exit();
+                return;
+            }
+        }
+
+        /**
+         * Handle the game over operation.
+         * @param event param
+         */
+        private function handleGameOver(event:Event):void
+        {
+            endLevel(level, score);
+            endGame(level, score);
+        }
+
+        /**
+         * Update called on each onFrame
+         * @param	elapsed Time since last frame
+         */
+        override public function update(elapsed:int):void
+        {	
+			var elapsedSecs:Number = elapsed;
+			elapsedSecs = elapsedSecs / 1000;
+			
+			InputManager.processKeyboardInput();
+			
+/*			
+			if (__trackGroup)
+			{
+				__trackGroup.start();  //only happens first time through
+				
+				__trackGroup.update(elapsed);
+			}
+			
+			if (trackBar_Click && trackBar_Bass)
+			{
+				trackBar_Click.update(elapsedSecs);
+				trackBar_Bass.update(elapsedSecs);
+			}
+
+			if (pianoController)
+			{
+				if (MusicManager.playing)
+				{
+					pianoController.update(elapsed);
+				}
+			}
+			
+			if (blocksController)
+			{
+				if (MusicManager.playing)
+				{
+					blocksController.update(elapsed);
+				}
+			}
+*/			
+			if (noteTrisSkin)
+			{
+				noteTrisSkin.update(elapsed);
+			}
+			
+			if (gameBoard)
+			{
+				gameBoard.update(elapsedSecs);
+			}
+			
+        }
+
+        override public function destroy():void
+        {
+			__content = null;
+
+			XMLLoader.instance.clearCache();
+			BinaryLoader.instance.clearCache();
+			MediaLoader.instance.clearCache();
+			MediaLoader.instance.destroy();
+        }
+    }
+}
