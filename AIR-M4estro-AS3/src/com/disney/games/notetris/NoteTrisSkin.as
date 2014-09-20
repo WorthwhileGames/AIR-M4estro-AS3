@@ -21,10 +21,10 @@
 	
 	import flash.events.Event;
 	
-	import com.noteflight.standingwave2.sources.SineSource;
-	import com.noteflight.standingwave2.elements.IAudioSource;
-	import com.noteflight.standingwave2.elements.AudioDescriptor;
-	import com.noteflight.standingwave2.output.AudioPlayer;
+	import com.noteflight.standingwave3.sources.SineSource;
+	import com.noteflight.standingwave3.elements.IAudioSource;
+	import com.noteflight.standingwave3.elements.AudioDescriptor;
+	import com.noteflight.standingwave3.output.AudioPlayer;
 	
 	import com.maestro.music.MusicManager;
 	

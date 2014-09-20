@@ -1,10 +1,5 @@
 package 
 {
-	//import com.cloudkid.*;
-	//import com.cloudkid.animation.Animator;
-	//import com.cloudkid.base.*;
-	//import com.cloudkid.games.*;
-	//import com.cloudkid.util.Debug;
 	import com.disney.Application;
 	import com.disney.OS;
 	import com.disney.loaders.XMLLoader;
@@ -15,13 +10,11 @@ package
 	import com.maestro.editor.MIDIEditor;
 	import com.maestro.managers.InputManager;
 	import com.maestro.music.MusicManager;
-	import com.noteflight.standingwave2.elements.AudioDescriptor;
-	import com.noteflight.standingwave2.elements.IAudioSource;
-	import com.noteflight.standingwave2.output.AudioPlayer;
-	import com.noteflight.standingwave2.sources.SineSource;
+	import com.noteflight.standingwave3.elements.AudioDescriptor;
+	import com.noteflight.standingwave3.elements.IAudioSource;
+	import com.noteflight.standingwave3.output.AudioPlayer;
+	import com.noteflight.standingwave3.sources.SineSource;
 	
-	import flash.desktop.NativeApplication;
-	import flash.display.BitmapData;
 	import flash.display.MovieClip;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
@@ -29,33 +22,17 @@ package
 	import flash.events.MouseEvent;
 	import flash.events.SampleDataEvent;
 	import flash.media.Sound;
+	import flash.utils.getTimer;
 	
 	import org.wwlib.utils.WwDebug;
 	import org.wwlib.utils.WwDeviceInfo;
 	
 	/*****/
 	
+	[SWF(backgroundColor="#999999", width="1024", height="768", frameRate="59")]
 	final public class M4estroMain extends Application
 	{
-		/** This variable should stay null. It ensures that the game class is compiled and put in the finished swf, so that the game can be created when it is needed*/
-		//private static const __classExistanceEnforcer:Class = TrashStashGame;
 		
-		// The game container
-		//private var __container:GameContainer;
-		
-		/** The pattern */
-		private var __contentPattern:BitmapData;
-		
-		private static const PADDING:int = 10;
-		
-		public static const DEBUG_IP:String = GAME::DEBUG_IP;
-		
-		//[Embed(source="../../../../../embedded_assets/intro.swf",mimeType="application/octet-stream")]
-		//private static var __controlsBytesClass:Class;
-		
-		private var __intro:MovieClip;
-		
-		/***** ANDREW TEST */
 		private var __assetPath:String = "na";
         private var __config:XML;
 		private var __instrumentConfigURL:String;
@@ -75,8 +52,14 @@ package
 		
 		/*****/
 		
+		private var __prevTime:int;
+		private var __frameTime:int;
+		private var __totalSeconds:Number;
+		private var __frameRate:Number;
+		
 		private var __deviceInfo:WwDeviceInfo;
 		private var __debug:WwDebug;
+		private var __appFlashStage:MovieClip;
 		private var __appDebugStage:MovieClip;
 		
 		/**
@@ -100,7 +83,10 @@ package
 				accZ = e.accelerationZ;
 			}
 			*/
+			__appFlashStage = new MovieClip();
 			__appDebugStage = new MovieClip();
+			
+			stage.addChild(__appFlashStage);
 			stage.addChild(__appDebugStage);
 			
 			__deviceInfo = WwDeviceInfo.init();
@@ -122,13 +108,23 @@ package
 			__debug.msg("screenDPI: " + __deviceInfo.screenDPI,"3");			
 			__debug.show = true;
 			
-			//com.cloudkid.util.Debug.globalMinLogLevel = LOG_GENERAL;
-			__debug.log("Constructor", "BundledGameContainer");
+			__appFlashStage.scaleX =  __deviceInfo.assetScaleFactor;
+			__appFlashStage.scaleY =  __deviceInfo.assetScaleFactor;
+			__appFlashStage.x =  __deviceInfo.stageX;
+			__appFlashStage.y =  __deviceInfo.stageY;
+						
+			__appDebugStage.scaleX =  __deviceInfo.assetScaleFactor;
+			__appDebugStage.scaleY =  __deviceInfo.assetScaleFactor;
+			__appDebugStage.x =  __deviceInfo.stageX;
+			__appDebugStage.y =  __deviceInfo.stageY;
 			
+			__debug.log("Constructor", "M4estroMain");
+			
+			addEventListener(Event.ENTER_FRAME, onEnterFrame);
 			
 			new OS(this);
 			
-			OS.instance.stage.frameRate = 30;
+			OS.instance.stage.frameRate = 59;
 			OS.instance.stage.align = StageAlign.TOP_LEFT;
 			OS.instance.stage.scaleMode = StageScaleMode.NO_SCALE;
 			
@@ -152,7 +148,7 @@ package
 
 			
 			keyboardMC = new KeyboardInstrumentMC();
-			addChild(keyboardMC);
+			__appFlashStage.addChild(keyboardMC);
 			keyboardMC.x = 190;
 			keyboardMC.y = 400;
 			
@@ -161,14 +157,14 @@ package
 			keyboardMC.key28.y += 5;
 			
 			testSymbol = new TestSymbol();
-			addChild(testSymbol);
+			__appFlashStage.addChild(testSymbol);
 			
 			funkController = new AudioInstrumentController();
 			funkController.setKeyboardMC(keyboardMC);
 			
 			
 			__midiEditorMC = new MIDIEditorMC();
-			addChild(__midiEditorMC);
+			__appFlashStage.addChild(__midiEditorMC);
 			__midiEditorMC.y = 30;
 			__midiEditor = new MIDIEditor(__midiEditorMC);
 			
@@ -177,9 +173,10 @@ package
             var configURL:String = __assetPath + "music_config.xml";
             __debug.log("init: configURL: " + configURL, "BGC");
             XMLLoader.instance.load(configURL, onConfigLoaded);
-			
+		
 			/*****/
-			
+
+/*
 			SYSTEM::MOBILE
 			{
 				//also available:
@@ -222,6 +219,17 @@ package
 			//var skinBytes:ByteArray = new __controlsBytesClass;
 			//BinaryLoader.instance.addToCache("embeddedSkin", skinBytes);
 			//MediaLoader.instance.load("embeddedSkin", onIntroLoaded, true);
+*/
+		}
+		
+		private function onEnterFrame(event:Event):void
+		{
+			var total_milliseconds:int = getTimer();
+			__frameTime = total_milliseconds - __prevTime;
+			__prevTime = total_milliseconds;
+			__frameRate = 1000.0 / __frameTime;
+			__totalSeconds = total_milliseconds / 1000.0;
+			WwDebug.fps = __frameRate;
 		}
 		
 		
@@ -326,7 +334,7 @@ package
 
 		}
 		*/
-		
+/*		
 		SYSTEM::MOBILE
 		{
 			private function onActivated(event:Event):void
@@ -353,6 +361,7 @@ package
 				//}
 			}
 		}
+*/
 		/*
 		SYSTEM::ANDROID
 		{
@@ -389,7 +398,7 @@ package
 			}
 		}
 		*/
-		
+/*		
 		SYSTEM::MOBILE
 		{
 			// Is called when the device's orientation changes. NOTE: iOS might consider ROTATED_RIGHT and ROTATED_LEFT to 
@@ -460,13 +469,14 @@ package
 				}
 			}
 		}
-		
+*/		
 		/**
 		 * 	According to http://www.adobe.com/devnet/flash/articles/saving_state_air_apps.html
 		 * 	this event isn't 100% reliable, sometimes because of the OS, sometimes not, so only
 		 * 	saving user data here isn't the best. That project saved every 30-60 seconds and on 
 		 * 	big user interactions for minimal loss of user progress.
 		 */
+/*
 		private function onExit(e:Event):void
 		{
 			NativeApplication.nativeApplication.removeEventListener(Event.EXITING, onExit);
@@ -482,7 +492,7 @@ package
 			
 			destroy();
 		}
-		
+*/		
 		override public function destroy():void
 		{
 			super.destroy();
@@ -512,7 +522,7 @@ package
 			__container.visible = false;
 		}
 		*/
-		
+/*		
 		private function onIntroDone(): void
 		{
 			log("onIntroDone");
@@ -545,7 +555,7 @@ package
 			}
 			
 		}
-		
+*/		
 		/**
 		 *   Handle Game container events
 		 *   @param ev Game Container event
