@@ -1,14 +1,9 @@
 package 
 {
-	import com.disney.Application;
-	import com.disney.OS;
-	import com.disney.loaders.XMLLoader;
 	import com.m4estro.ui.KeyboardInstrumentMC;
-	import com.m4estro.ui.TestSymbol;
 	import com.m4estro.ui.editor.MIDIEditorMC;
 	import com.maestro.controller.AudioInstrumentController;
 	import com.maestro.editor.MIDIEditor;
-	import com.maestro.managers.InputManager;
 	import com.maestro.music.MusicManager;
 	import com.noteflight.standingwave3.elements.AudioDescriptor;
 	import com.noteflight.standingwave3.elements.IAudioSource;
@@ -16,12 +11,14 @@ package
 	import com.noteflight.standingwave3.sources.SineSource;
 	
 	import flash.display.MovieClip;
-	import flash.display.StageAlign;
-	import flash.display.StageScaleMode;
+	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.events.SampleDataEvent;
+	import flash.filesystem.File;
 	import flash.media.Sound;
+	import flash.net.URLLoader;
+	import flash.net.URLRequest;
 	import flash.utils.getTimer;
 	
 	import org.wwlib.utils.WwDebug;
@@ -30,7 +27,7 @@ package
 	/*****/
 	
 	[SWF(backgroundColor="#999999", width="1024", height="768", frameRate="59")]
-	final public class M4estroMain extends Application
+	final public class M4estroMain extends Sprite// extends Application
 	{
 		
 		private var __assetPath:String = "na";
@@ -48,7 +45,6 @@ package
 		
 		private var keyboardMC:KeyboardInstrumentMC;
 		private var funkController:AudioInstrumentController;
-		private var testSymbol:TestSymbol;
 		
 		/*****/
 		
@@ -67,22 +63,7 @@ package
 		*/
 		public function M4estroMain()
 		{
-			/*Accelerometer handling code
-				//if accelerometer is available then activate it to control the ball
-				if(Accelerometer.isSupported)
-				{
-					acc = new Accelerometer();
-					acc.addEventListener(AccelerometerEvent.UPDATE, accUpdate);
-					acc.setRequestedUpdateInterval(30);
-				}
-			//handler for accelerometer
-			private function accUpdate(e:AccelerometerEvent):void
-			{
-				accX = e.accelerationX;
-				accY = e.accelerationY;
-				accZ = e.accelerationZ;
-			}
-			*/
+			
 			__appFlashStage = new MovieClip();
 			__appDebugStage = new MovieClip();
 			
@@ -120,26 +101,13 @@ package
 			
 			__debug.log("Constructor", "M4estroMain");
 			
-			addEventListener(Event.ENTER_FRAME, onEnterFrame);
-			
-			new OS(this);
-			
-			OS.instance.stage.frameRate = 59;
-			OS.instance.stage.align = StageAlign.TOP_LEFT;
-			OS.instance.stage.scaleMode = StageScaleMode.NO_SCALE;
-			
-			/****** ANDREW TEST */
-			
-			//OS.instance.stage.addEventListener(MouseEvent.MOUSE_DOWN, onNote);
-			
 			__sound = new Sound();
 			__sound.addEventListener(SampleDataEvent.SAMPLE_DATA, onSampleData);
 			__sound.play();
 			
-			__assetPath = OS.instance.basePath + "assets/";
+			__assetPath = File.applicationDirectory.resolvePath("assets/").url;
 			__debug.log("init: basePath: " + __assetPath, "BGC");
             
-			InputManager.init(OS.instance.stage);
 			MusicManager.instance.init(__assetPath);
 			
 			MusicManager.instance.addEventListener(MusicManager.INSTRUMENT_CONFIG_LOADED, onInstrumentConfigLoaded);
@@ -156,9 +124,6 @@ package
 			__debug.log("keyboardMC: name: " + keyboardMC.key28.name, "BGC");
 			keyboardMC.key28.y += 5;
 			
-			testSymbol = new TestSymbol();
-			__appFlashStage.addChild(testSymbol);
-			
 			funkController = new AudioInstrumentController();
 			funkController.setKeyboardMC(keyboardMC);
 			
@@ -167,59 +132,16 @@ package
 			__appFlashStage.addChild(__midiEditorMC);
 			__midiEditorMC.y = 30;
 			__midiEditor = new MIDIEditor(__midiEditorMC);
-			
-			
-			
-            var configURL:String = __assetPath + "music_config.xml";
-            __debug.log("init: configURL: " + configURL, "BGC");
-            XMLLoader.instance.load(configURL, onConfigLoaded);
-		
-			/*****/
 
-/*
-			SYSTEM::MOBILE
-			{
-				//also available:
-				//OS.instance.stage.setAspectRatio(StageAspectRatio.LANDSCAPE);
-				//stage.autoOrients (defaults to true)
-				//stage.deviceOrientation (defaults to landscape)
-				//stage.supportedOrientations (a vector of strings) - uses StageOrientation constants
-				//stage.setOrientation(newOrientation:String) - uses StageOrientation constants
-				//stage.setAspectRatio(StageAspectRatio.LANDSCAPE); - PORTRAIT is also available
-				OS.instance.stage.addEventListener(StageOrientationEvent.ORIENTATION_CHANGING, onOrientationChange, false, 100, true); 
-			}
-			NativeApplication.nativeApplication.addEventListener(Event.EXITING, onExit);
-			SYSTEM::ANDROID
-			{
-				
-				OS.instance.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
-			}
-			SYSTEM::MOBILE
-			{
-				NativeApplication.nativeApplication.addEventListener(Event.ACTIVATE, onActivated);
-				NativeApplication.nativeApplication.addEventListener(Event.DEACTIVATE, onDeactivated);
-			}
+			var configURL:String = __assetPath + "/music_config.xml";
+            __debug.log("init: configURL: " + configURL, "BGC");
 			
-			CONFIG::DEBUG
-			{
-				OS.instance.totalMemory.visible = true;
-				OS.instance.framerate.visible = true;
-			}
+			var url_request:URLRequest = new URLRequest(configURL);
+			var loader:URLLoader = new URLLoader(url_request);
+			loader.addEventListener(Event.COMPLETE, onConfigLoaded);
 			
-			SYSTEM::MOBILE
-			{
-				//Multitouch.inputMode = MultitouchInputMode.TOUCH_POINT;//Pretty much required if you want to receive TOUCH_TAP events
-				
-				CONFIG::DEBUG
-				{
-					//com.cloudkid.util.__debug.useNetworkDebugging(DEBUG_IP);
-				}
-			}
 			
-			//var skinBytes:ByteArray = new __controlsBytesClass;
-			//BinaryLoader.instance.addToCache("embeddedSkin", skinBytes);
-			//MediaLoader.instance.load("embeddedSkin", onIntroLoaded, true);
-*/
+			addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
 		
 		private function onEnterFrame(event:Event):void
@@ -230,21 +152,21 @@ package
 			__frameRate = 1000.0 / __frameTime;
 			__totalSeconds = total_milliseconds / 1000.0;
 			WwDebug.fps = __frameRate;
+			
+			if (__midiEditor) __midiEditor.update(__frameTime);
 		}
-		
-		
-		/***** ANDREW TEST */
-		
-        private function onConfigLoaded(xml:XML):void
+				
+        private function onConfigLoaded(event:Event):void
         {
+			var xml:XML = new XML(event.target.data);
             // Store our game config
             __config = xml;
 
-            __debug.log("onConfigLoaded", "BundledGameContainer");
+            __debug.log(xml, "onConfigLoaded");
             //MediaLoader.instance.load(assetPath + __config.content.@swf, onContentLoaded);
 			
-			__instrumentConfigURL = __assetPath + __config.instrument.@config;
-			__soundtrackConfigURL = __assetPath + __config.soundtrack.@config;
+			__instrumentConfigURL = __assetPath + "/" + __config.instrument.@config;
+			__soundtrackConfigURL = __assetPath + "/" + __config.soundtrack.@config;
 			__debug.log("onConfigLoaded: Instrument Config URL: " + __instrumentConfigURL, "BundledGameContainer");
 			__debug.log("onConfigLoaded: Soundtrack Config URL: " + __soundtrackConfigURL, "BundledGameContainer");
 			
@@ -276,7 +198,7 @@ package
 			//playSound();
 			
 			//MusicManager.instance.playSoundtrack(1.0);
-			testSymbol.accelerate();
+			//testSymbol.accelerate();
 		}
 		
 		private function playSound():void
@@ -318,287 +240,5 @@ package
 				event.data.writeFloat(v);
 			}
 		}		
-		/*****/
-		
-		/*
-		private function onIntroLoaded(result:MediaLoaderResult): void
-		{
-			assert(result != null, "No intro to load");
-			
-			__intro = MovieClip(result.content);
-			resizeIntro();
-			__intro.stop();
-			//addChild(__intro);
-			// SAR
-			//Animator.play(__intro, "intro", onIntroDone);
-
-		}
-		*/
-/*		
-		SYSTEM::MOBILE
-		{
-			private function onActivated(event:Event):void
-			{
-				log("activated!");
-				
-				//if(__container && __container.game)
-				//{
-				//	__container.game.onActivate();
-				//}
-			}
-			
-			private function onDeactivated(event:Event):void
-			{
-				log("deactivated!");
-				
-				//if(__container && __container.game && __container.game.onDeactivate())
-				//{
-					//do nothing
-				//}
-				//else
-				//{
-					NativeApplication.nativeApplication.exit();
-				//}
-			}
-		}
-*/
-		/*
-		SYSTEM::ANDROID
-		{
-			private function onKeyDown(event:KeyboardEvent):void
-			{
-				if(__container && __container.game && __container.game.onSystemKey(event.keyCode))
-				{
-					event.preventDefault();
-					event.stopImmediatePropagation();
-					//do nothing, app took care of it
-				}
-				else if(event.keyCode == Keyboard.BACK)
-				{
-					event.preventDefault();
-					event.stopImmediatePropagation();
-					NativeApplication.nativeApplication.exit();
-					
-					log("Back Pressed");
-				}
-				else if(event.keyCode == Keyboard.MENU)
-				{
-					event.preventDefault();
-					event.stopImmediatePropagation();
-
-					log("Menu Pressed");
-				}
-				else if(event.keyCode == Keyboard.SEARCH)
-				{
-					event.preventDefault();
-					event.stopImmediatePropagation();
-
-					log("Search Pressed");
-				}
-			}
-		}
-		*/
-/*		
-		SYSTEM::MOBILE
-		{
-			// Is called when the device's orientation changes. NOTE: iOS might consider ROTATED_RIGHT and ROTATED_LEFT to 
-			// be landscape mode, while Android does not
-			private function onOrientationChange(event:StageOrientationEvent):void 
-			{
-				//if(__container && __container.game)
-				//{
-				//	__container.game.onOrientationChange(event.afterOrientation);
-				//}
-
-				//event.stopImmediatePropagation();
-				//Rotating the OS is inappropriate
-				switch (event.afterOrientation)
-				{ 
-					case StageOrientation.DEFAULT: 
-						// re-orient display objects based on 
-						// the default (right-side up) orientation.
-						if(SYSTEM::IOS)
-						{
-							event.preventDefault();
-						}
-						else
-						{
-							if(event.beforeOrientation == StageOrientation.ROTATED_LEFT || event.beforeOrientation == StageOrientation.ROTATED_RIGHT)
-							{
-								event.preventDefault();
-							}
-						}
-						break;
-					case StageOrientation.ROTATED_RIGHT: 
-						// Re-orient display objects based on 
-						// right-hand orientation.
-						if(SYSTEM::IOS)
-						{
-						}
-						else
-						{
-							event.preventDefault();
-						}
-						break;
-					case StageOrientation.ROTATED_LEFT: 
-						// Re-orient display objects based on 
-						// left-hand orientation.
-						if(SYSTEM::IOS)
-						{
-						}
-						else
-						{
-							event.preventDefault();
-						}
-						break;
-					case StageOrientation.UPSIDE_DOWN: 
-						// Re-orient display objects based on 
-						// upside-down orientation.
-						if(SYSTEM::IOS)
-						{
-							event.preventDefault();
-						}
-						else
-						{
-							if(event.beforeOrientation == StageOrientation.ROTATED_LEFT || event.beforeOrientation == StageOrientation.ROTATED_RIGHT)
-							{
-								event.preventDefault();
-							}
-						}
-						break;
-				}
-			}
-		}
-*/		
-		/**
-		 * 	According to http://www.adobe.com/devnet/flash/articles/saving_state_air_apps.html
-		 * 	this event isn't 100% reliable, sometimes because of the OS, sometimes not, so only
-		 * 	saving user data here isn't the best. That project saved every 30-60 seconds and on 
-		 * 	big user interactions for minimal loss of user progress.
-		 */
-/*
-		private function onExit(e:Event):void
-		{
-			NativeApplication.nativeApplication.removeEventListener(Event.EXITING, onExit);
-			SYSTEM::ANDROID
-			{
-				OS.instance.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
-			}
-			SYSTEM::MOBILE//Maybe just iOS?
-			{
-				NativeApplication.nativeApplication.removeEventListener(Event.ACTIVATE, onActivated);
-				NativeApplication.nativeApplication.removeEventListener(Event.DEACTIVATE, onDeactivated);
-			}
-			
-			destroy();
-		}
-*/		
-		override public function destroy():void
-		{
-			super.destroy();
-			
-			//__container.destroy();
-			//__container = null;
-		}
-		
-		/**
-		 *   Initialize the application
-		 */
-		/*
-		override public function init(): void
-		{
-			SoundManager.init();
-			
-			// Setup the Game container
-			__container = new GameContainer();
-			__container.addEventListener(GameContainerEvent.START_GAME, onContainerHandler);
-			__container.addEventListener(GameContainerEvent.START_LEVEL, onContainerHandler);
-			__container.addEventListener(GameContainerEvent.END_LEVEL, onContainerHandler);
-			__container.addEventListener(GameContainerEvent.END_GAME, onContainerHandler);
-			__container.addEventListener(GameContainerEvent.CLEAR_GAME, onContainerHandler);
-			__container.addEventListener(GenericTrackingEvent.TRACK_EVENT, onTrackEvent);
-			addChild(__container);
-			__container.loadGame(__classExistanceEnforcer, "TrashStashGame", "");
-			__container.visible = false;
-		}
-		*/
-/*		
-		private function onIntroDone(): void
-		{
-			log("onIntroDone");
-			removeChild(__intro);
-			__intro = null;
-			//__container.visible = true;
-			//__container.game["introDone"]();
-						
-		}
-		
-		public function resizeIntro():void{
-			var stageWidth:Number;
-			var stageHeight:Number;
-			if(SYSTEM::MOBILE)
-			{
-				stageWidth = Math.max(OS.instance.stage.fullScreenWidth, OS.instance.stage.fullScreenHeight);
-				stageHeight = Math.min(OS.instance.stage.fullScreenWidth, OS.instance.stage.fullScreenHeight);
-			}
-			else//if Air
-			{
-				stageWidth = 1024;
-				stageHeight = 768;
-			}
-
-			var scale:Number = stageWidth / __intro.width;
-			__intro.scaleX = __intro.scaleY = __intro.scaleX*scale;
-			
-			if(__intro.height > stageHeight){
-				__intro.y -= (__intro.height - stageHeight)/2;
-			}
-			
-		}
-*/		
-		/**
-		 *   Handle Game container events
-		 *   @param ev Game Container event
-		 */
-		//private function onContainerHandler(ev:GameContainerEvent): void
-		//{
-		//	SYSTEM::FLASH
-		//	{
-		//		log(ev.type + " (level:"+ev.level+", score:"+ev.score+")", LOG_INFO);
-		//	}
-		//}
-		
-		/**
-		 *   Track custom events
-		 *   @param ev Track event
-		 */
-		//private function onTrackEvent(ev:GenericTrackingEvent): void
-		//{
-		//	SYSTEM::FLASH
-		//	{
-		//		log(ev.type + " (category:"+ev.category+", action:"+ev.action+", label:"+ev.label+", value:"+ev.value+")", LOG_INFO);
-		//	}
-		//}
-		
-		/**
-		 *   Update the game
-		 *   @param	elapsed Time since last update
-		 */
-		override public function update(elapsed:int):void
-		{
-			//if(__container)
-			//{
-			//	__container.update(elapsed);
-			//}
-			
-			var elapsedSecs:Number = elapsed;
-			elapsedSecs = elapsedSecs / 1000;
-			
-			InputManager.processKeyboardInput();
-			
-			__midiEditor.update(elapsed);
-			
-        }
-		
 	}
 }

@@ -1,8 +1,8 @@
-package com.disney.games.notetris.control
+package com.m4estro.games.notetris.control
 {
-    import com.disney.base.BaseMovieClip;
-    import com.disney.ui.buttons.PushButton;
-    import com.disney.ui.buttons.PushButtonEvent;
+    import com.m4estro.vc.BaseMovieClip;
+    import com.JacksonMattJon.ui.buttons.PushButton;
+    import com.JacksonMattJon.ui.buttons.PushButtonEvent;
 
     /**
      * Back end of the game tips.

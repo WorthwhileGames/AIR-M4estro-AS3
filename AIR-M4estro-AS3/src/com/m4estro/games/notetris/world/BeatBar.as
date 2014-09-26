@@ -1,9 +1,9 @@
-﻿package com.disney.games.notetris.world 
+﻿package com.m4estro.games.notetris.world 
 {
-	import com.disney.base.BaseMovieClip;
-	import com.disney.games.notetris.control.GameTimer;
+	import com.m4estro.vc.BaseMovieClip;
+	import com.maestro.controller.GameTimer;
+	
 	import flash.display.MovieClip;
-	import flash.utils.Timer;
 	
 	/**
 	 * ...

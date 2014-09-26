@@ -1,7 +1,7 @@
-package com.disney.games.notetris.control
+package com.m4estro.games.notetris.control
 {
-	import com.disney.base.BaseMovieClip;
-	import com.disney.ui.buttons.PushButton;
+	import com.m4estro.vc.BaseMovieClip;
+	import com.JacksonMattJon.ui.buttons.PushButton;
 
 	/**
 	 * The back end of the mc gameInit.

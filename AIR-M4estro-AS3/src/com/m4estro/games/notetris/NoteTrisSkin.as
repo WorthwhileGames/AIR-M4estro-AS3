@@ -1,35 +1,24 @@
-﻿package com.disney.games.notetris
+﻿package com.m4estro.games.notetris
 {
-    import com.disney.base.BaseMovieClip;
-	import com.maestro.world.GameBoard;
-	import com.disney.games.notetris.world.BeatBar;
-	import com.disney.games.notetris.world.NotationView;
-	import com.disney.games.notetris.world.ScoreColumn;
-	import com.disney.ui.sliders.LinearSlider;
-	import com.disney.util.Debug;
-	import com.maestro.controller.AudioInstrumentController;
-	import com.maestro.controller.MeasureController;
-	import com.maestro.editor.MIDIEditor;
-	import flash.display.MovieClip;
-	import flash.events.MouseEvent;
-	
-	import com.disney.cars.ui.buttons.PushButtonMicroTintable;
-	import com.disney.cars.ui.sliders.HorizontalSliderNormal;
-	import com.disney.cars.ui.sliders.VerticalSliderNormal;
-	import com.disney.ui.buttons.PushButtonEvent;
-	import com.disney.ui.sliders.SliderEvent;
-	
-	import flash.events.Event;
-	
-	import com.noteflight.standingwave3.sources.SineSource;
-	import com.noteflight.standingwave3.elements.IAudioSource;
-	import com.noteflight.standingwave3.elements.AudioDescriptor;
-	import com.noteflight.standingwave3.output.AudioPlayer;
-	
-	import com.maestro.music.MusicManager;
-	
-	
-
+    import com.JacksonMattJon.ui.buttons.PushButton;
+    import com.JacksonMattJon.ui.buttons.PushButtonEvent;
+    import com.JacksonMattJon.ui.sliders.HorizontalSlider;
+    import com.JacksonMattJon.ui.sliders.SliderEvent;
+    import com.JacksonMattJon.ui.sliders.VerticalSlider;
+    import com.m4estro.games.notetris.world.NotationView;
+    import com.m4estro.games.notetris.world.ScoreColumn;
+    import com.m4estro.vc.BaseMovieClip;
+    import com.maestro.controller.AudioInstrumentController;
+    import com.maestro.controller.MeasureController;
+    import com.maestro.editor.MIDIEditor;
+    import com.maestro.music.MusicManager;
+    import com.maestro.world.GameBoard;
+    import com.noteflight.standingwave3.elements.AudioDescriptor;
+    import com.noteflight.standingwave3.elements.IAudioSource;
+    import com.noteflight.standingwave3.output.AudioPlayer;
+    import com.noteflight.standingwave3.sources.SineSource;
+    
+    import flash.events.Event;
 
     /**
      * Back end for the main Flash.
@@ -49,12 +38,12 @@
 		//public var trackBar_Click:MovieClip;
 		//public var trackBar_Bass:MovieClip;
 		
-		public var pbStart:PushButtonMicroTintable;
-		public var pbPause:PushButtonMicroTintable;
-		public var pbMakeTone:PushButtonMicroTintable;
+		public var pbStart:PushButton;
+		public var pbPause:PushButton;
+		public var pbMakeTone:PushButton;
 		
-		public var slFrequency:HorizontalSliderNormal;
-		public var slTempo:VerticalSliderNormal;
+		public var slFrequency:HorizontalSlider;
+		public var slTempo:VerticalSlider;
 		
 		public var measureController:MeasureController;
 		
@@ -94,8 +83,8 @@
 		
 		public function onButton(event:Event):void
 		{
-			var button:PushButtonMicroTintable = PushButtonMicroTintable(event.target);
-			Debug.log("Button: Release: " + button.name, "NoteTris");
+			var button:PushButton = PushButton(event.target);
+			log("Button: Release: " + button.name, "NoteTris");
 			
 			switch (button.name)
 			{
