@@ -1,0 +1,5 @@
+<game_config>
+	<content swf="Minigame_NoteTrisSkin.swf"/><!-- The content SWF -->
+	<instrument config="instruments/instrument_config.xml" />
+	<soundtrack config="songs/NoteTris_2.xml" />
+</game_config>

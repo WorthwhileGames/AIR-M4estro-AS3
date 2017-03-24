@@ -12,6 +12,9 @@ package
 	
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
+	import flash.display.Stage;
+	import flash.display.StageAlign;
+	import flash.display.StageScaleMode;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 	import flash.events.SampleDataEvent;
@@ -29,6 +32,8 @@ package
 	[SWF(backgroundColor="#999999", width="1024", height="768", frameRate="59")]
 	final public class M4estroMain extends Sprite// extends Application
 	{
+		public static var APP_VERSION:String = "0.1";
+		public static var appStage:Stage;
 		
 		private var __assetPath:String = "na";
         private var __config:XML;
@@ -63,6 +68,12 @@ package
 		*/
 		public function M4estroMain()
 		{
+			super();
+			
+			appStage = stage;
+			appStage.color = 0x333333;
+			appStage.scaleMode = StageScaleMode.NO_SCALE;
+			appStage.align = StageAlign.TOP_LEFT;
 			
 			__appFlashStage = new MovieClip();
 			__appDebugStage = new MovieClip();
@@ -86,7 +97,8 @@ package
 			__debug.msg("resolutionX: " + __deviceInfo.resolutionX,"3");
 			__debug.msg("resolutionY: " + __deviceInfo.resolutionY,"3");
 			__debug.msg("isDebugger: " + __deviceInfo.isDebugger,"3");
-			__debug.msg("screenDPI: " + __deviceInfo.screenDPI,"3");			
+			__debug.msg("screenDPI: " + __deviceInfo.screenDPI,"3");
+			__debug.msg("assetScaleFactor: " + __deviceInfo.assetScaleFactor,"3");
 			__debug.show = true;
 			
 			__appFlashStage.scaleX =  __deviceInfo.assetScaleFactor;

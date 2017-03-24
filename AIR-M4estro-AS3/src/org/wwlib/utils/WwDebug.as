@@ -90,8 +90,8 @@ package org.wwlib.utils
 			__SHOW_DEBUG_MESSAGES = true;
 			
 			__debugPanel_mc = new debugPanel();
-			__debugPanel_mc.x = WwDeviceInfo.instance.debuggerX;  
-			__debugPanel_mc.y = WwDeviceInfo.instance.debuggerY;
+			__debugPanel_mc.x = 20; //WwDeviceInfo.instance.debuggerX;  
+			__debugPanel_mc.y = 0; //WwDeviceInfo.instance.debuggerY;
 			__tab_move = __debugPanel_mc["tab_move"];
 			__tab_lvl1 = __debugPanel_mc["tab_lvl1"];
 			__tab_lvl2 = __debugPanel_mc["tab_lvl2"];
